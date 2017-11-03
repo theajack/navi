@@ -1,5 +1,6 @@
 
-var offsetHeight=120;
+var offsetHeight=120;//设置一个偏移量
+
 var item=$(".item");
 var wrapper=$(".wrapper");
 var naviLis=$(".navi-li");
@@ -10,34 +11,35 @@ var widthType=0;//当前宽度类型，为了不让onresize 频繁触发修改�
 var WIDTH_FULL=1;
 var perWidth;
 var curIndex=0;
-//420px 5 
-//700px 7 
-//>700px 全部
-if(location.hash!=""){
-  for(var i=0;i<naviLis.length;i++){
-    if($(naviLis[i]).children().eq(0).attr("href")==location.hash){
-      naviTo(i,true);
-      break;
+
+$(function(){
+  if(location.hash!=""){
+    for(var i=0;i<naviLis.length;i++){
+      if($(naviLis[i]).children().eq(0).attr("href")==location.hash){
+        naviTo(i,true);
+        break;
+      }
     }
   }
-}
-checkWidth();
-$(function(){
+  checkWidth();
   $(window).scroll(function(){
     var top = $("body").scrollTop()+offsetHeight;
-    if(foot.offset().top<=top||$(item[0]).offset().top>top){
+    if(foot.offset().top<top||$(item[0]).offset().top>top){
       wrapper.hide();
     }else{
       wrapper.show();
-      for(var i=item.length-1;i>=0;i--){
+      for(var i=0;i<item.length;i++){
         if($(item[i]).offset().top<=top){
-          curIndex=i;
-          $(active($(naviLis[i])));
-          history.replaceState({},"","#"+$(naviLis[i]).find(".li-text").text());
-          checkNaviScroll(i);
-          break;
+          if(i==item.length-1||$(item[i+1]).offset().top>top){
+            curIndex=i;
+            $(active($(naviLis[i])));
+            history.replaceState({},"","#"+$(naviLis[i]).find(".li-text").text());
+            checkNaviScroll(i); 
+            break;
+          }
         }
       }
+      
     }
   });
   naviLis.click(function(){
@@ -50,6 +52,7 @@ $(function(){
         if(naviUl.data("left")){
           naviUl.css("left",naviUl.data("left"));
         }
+        setNaviUlLeft(curIndex);
       }else{
         item.addClass("less");
         item.find(".li-text").text("Less");
@@ -71,9 +74,10 @@ function active(item){
   $(".navi-li.active").removeClass("active");
   item.addClass("active");
 }
+var t;
 function naviTo(index,jump){
   curIndex=index;
-  var top=($(item[index]).offset().top-offsetHeight);
+  var top=($(item[index]).offset().top-offsetHeight+10);
   if(jump===true){
     $("body")[0].scrollTop=top;
   }else{
@@ -84,6 +88,8 @@ function checkNaviScroll(i){
   if(widthType!=WIDTH_FULL&&!view.hasClass("less")){//导航栏滑动
     if(i+1>=widthType){
       setNaviUlLeft(i);
+    }else{
+      naviUl.css("left","0px")
     }
   }
 }
